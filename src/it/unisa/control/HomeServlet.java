@@ -28,7 +28,7 @@ public class HomeServlet extends HttpServlet {
 		
 		ArrayList<ArrayList<ProdottoBean>> categorie = new ArrayList<>();
 		String redirectedPage = request.getParameter("page");
-		
+		if(redirectedPage.contains("META-INF/context.xml") || redirectedPage.contains("WEB-INF/web.xml")) redirectedPage = "";
 		try {
 			ArrayList<ProdottoBean> PS5 = dao.doRetrieveByPiattaforma("PlayStation 5");
 			ArrayList<ProdottoBean> XboxSeries = dao.doRetrieveByPiattaforma("Xbox Series");
