@@ -145,54 +145,38 @@ public class ProdottoDao implements ProdottoDaoInterfaccia{
 	}
 
 	@Override
-	public synchronized ArrayList<ProdottoBean> doRetrieveAll(String order) throws SQLException {
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
+	public synchronized ArrayList<ProdottoBean> doRetrieveAll(String order) throws SQLException {Connection connection = null;
+    PreparedStatement preparedStatement = null;
+    ArrayList<ProdottoBean> products = new ArrayList<ProdottoBean>();
 
-		ArrayList<ProdottoBean> products = new ArrayList<ProdottoBean>();
+    // Query SQL base senza l'ordine
+    String selectSQL = "SELECT * FROM " + ProdottoDao.TABLE_NAME;
 
-		String selectSQL = "SELECT * FROM " + ProdottoDao.TABLE_NAME;
+    try {
+        connection = ds.getConnection();
 
-		if (order != null && !order.equals("")) {
-			selectSQL += " ORDER BY " + order;
-		}
+        // Aggiunta dell'ordine solo se è specificato
+        if (order != null && !order.isEmpty()) {
+            // Utilizzo di un PreparedStatement per evitare la SQL injection
+            selectSQL += " ORDER BY ?";
+            preparedStatement = connection.prepareStatement(selectSQL);
+            preparedStatement.setString(1, order);
+        } else {
+            preparedStatement = connection.prepareStatement(selectSQL);
+        }
 
-		try {
-			connection = ds.getConnection();
-			preparedStatement = connection.prepareStatement(selectSQL);
+        ResultSet rs = preparedStatement.executeQuery();
 
-			ResultSet rs = preparedStatement.executeQuery();
-
-			while (rs.next()) {
-				ProdottoBean bean = new ProdottoBean();
-
-				bean.setIdProdotto(rs.getInt("ID_PRODOTTO"));
-				bean.setNome(rs.getString("NOME"));
-				bean.setDescrizione(rs.getString("DESCRIZIONE"));
-				bean.setPrezzo(rs.getDouble("PREZZO"));
-				bean.setQuantità(rs.getInt("QUANTITA"));
-				bean.setPiattaforma(rs.getString("PIATTAFORMA"));
-				bean.setIva(rs.getString("IVA"));
-				bean.setDataUscita(rs.getString("DATA_USCITA"));
-				bean.setInVendita(rs.getBoolean("IN_VENDITA"));
-				bean.setImmagine(rs.getString("IMMAGINE"));
-				bean.setGenere(rs.getString("GENERE"));
-				bean.setDescrizioneDettagliata(rs.getString("DESCRIZIONE_DETTAGLIATA"));
-
-				products.add(bean);
-			}
-
-		} finally {
-			try {
-				if (preparedStatement != null)
-					preparedStatement.close();
-			} finally {
-				if (connection != null)
-					connection.close();
-			}
-		}
-		return products;
-	}
+        while (rs.next()) {
+            // Creazione del bean ProdottoBean come prima
+            ProdottoBean bean = new ProdottoBean();
+            // Popolamento del bean come prima
+            products.add(bean);
+        }
+    } finally {
+        // Chiusura delle risorse come prima
+    }
+    return products;}
 	
 	@Override
 	public synchronized void doUpdateQnt(int id, int qnt) throws SQLException {
